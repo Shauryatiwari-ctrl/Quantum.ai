@@ -3,1332 +3,413 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum.ai Leap - Neural Interface</title>
+    <title>Quantum.ai Leap - Functional AI Interface</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --quantum-blue: #0066ff;
-            --quantum-purple: #6366f1;
-            --quantum-cyan: #06b6d4;
-            --bg-primary: #020617;
-            --bg-secondary: #0f172a;
-            --bg-tertiary: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #64748b;
+            --quantum-blue: #0066ff; --quantum-purple: #6366f1; --quantum-cyan: #06b6d4;
+            --bg-primary: #020617; --bg-secondary: #0f172a; --bg-tertiary: #1e293b;
+            --text-primary: #f8fafc; --text-secondary: #cbd5e1; --text-muted: #64748b;
             --border-color: rgba(59, 130, 246, 0.15);
-            --glow: rgba(59, 130, 246, 0.5);
         }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            overflow: hidden;
-            height: 100vh;
-            position: relative;
+            font-family: 'Inter', sans-serif; background: var(--bg-primary);
+            color: var(--text-primary); overflow: hidden; height: 100vh;
         }
-
-        /* Advanced 3D Particle System */
-        #quantum-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
+        /* Particle Canvas */
+        #canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        .grid { position: fixed; inset: 0;
+            background: linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+            background-size: 50px 50px; z-index: 0; opacity: 0.5; animation: pulse 4s ease-in-out infinite;
         }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.5; } }
+        .container { position: relative; z-index: 2; display: flex; height: 100vh; }
 
-        /* Neural Network Background */
-        .neural-grid {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: 0;
-            opacity: 0.5;
-            animation: gridPulse 4s ease-in-out infinite;
-        }
-
-        @keyframes gridPulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.5; }
-        }
-
-        /* Holographic Overlay */
-        .holographic-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 1;
-            animation: holoShift 10s ease-in-out infinite;
-        }
-
-        @keyframes holoShift {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(20px, -20px); }
-            50% { transform: translate(-20px, 20px); }
-            75% { transform: translate(20px, 20px); }
-        }
-
-        /* Main Container */
-        .app-container {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            height: 100vh;
-        }
-
-        /* Advanced Sidebar */
+        /* Sidebar */
         .sidebar {
-            width: 360px;
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.85) 100%);
-            backdrop-filter: blur(40px) saturate(180%);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 360px; background: linear-gradient(180deg, rgba(15,23,42,0.95), rgba(15,23,42,0.85));
+            backdrop-filter: blur(40px); border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; transition: transform 0.4s;
         }
-
-        .sidebar::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 2px;
-            height: 100%;
-            background: linear-gradient(180deg, transparent, var(--quantum-cyan), transparent);
-            animation: borderGlow 3s ease-in-out infinite;
-        }
-
-        @keyframes borderGlow {
-            0%, 100% { opacity: 0.3; transform: translateY(-50%); }
-            50% { opacity: 1; transform: translateY(50%); }
-        }
-
-        /* Premium Logo */
-        .logo-section {
-            padding: 32px 24px;
-            border-bottom: 1px solid var(--border-color);
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), transparent);
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .logo-container:hover {
-            transform: scale(1.02);
-        }
-
+        .sidebar.hide { transform: translateX(-100%); }
+        .logo { padding: 32px 24px; border-bottom: 1px solid var(--border-color); }
+        .logo-box { display: flex; align-items: center; gap: 16px; }
         .logo-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: 700;
-            position: relative;
-            box-shadow: 0 0 40px rgba(59, 130, 246, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.1);
-            animation: logoFloat 3s ease-in-out infinite;
+            width: 56px; height: 56px; background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
+            border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            font-size: 28px; box-shadow: 0 0 40px rgba(59,130,246,0.6); animation: float 3s ease-in-out infinite;
         }
-
-        @keyframes logoFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
-        .logo-icon::after {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            background: linear-gradient(45deg, var(--quantum-cyan), var(--quantum-purple), var(--quantum-blue));
-            border-radius: 16px;
-            z-index: -1;
-            opacity: 0.5;
-            filter: blur(10px);
-        }
-
-        .logo-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .logo-title {
-            font-size: 24px;
-            font-weight: 700;
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .logo-text { font-size: 24px; font-weight: 700;
             background: linear-gradient(135deg, var(--quantum-cyan), var(--quantum-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.5px;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        .logo-subtitle {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 2px;
-        }
-
-        /* User Profile Card */
         .user-card {
-            margin: 24px;
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.05));
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            margin: 24px; padding: 20px; background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(99,102,241,0.05));
+            border: 1px solid var(--border-color); border-radius: 16px; cursor: pointer; transition: all 0.3s;
         }
-
-        .user-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s ease;
+        .user-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(59,130,246,0.2); }
+        .user-content { display: flex; align-items: center; gap: 16px; }
+        .avatar {
+            width: 52px; height: 52px; background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
+            border-radius: 14px; display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 600; box-shadow: 0 4px 16px rgba(59,130,246,0.4);
         }
-
-        .user-card:hover::before {
-            left: 100%;
-        }
-
-        .user-card:hover {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.1));
-            border-color: rgba(59, 130, 246, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
-        }
-
-        .user-card-content {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            position: relative;
-        }
-
-        .user-avatar {
-            width: 52px;
-            height: 52px;
-            background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 600;
-            position: relative;
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
-        }
-
-        .user-avatar::after {
-            content: '';
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            width: 12px;
-            height: 12px;
-            background: #22c55e;
-            border: 2px solid var(--bg-secondary);
-            border-radius: 50%;
-            box-shadow: 0 0 8px #22c55e;
-        }
-
-        .user-info h3 {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .user-info p {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
         .user-stats {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(59, 130, 246, 0.1);
-            display: flex;
-            justify-content: space-around;
+            margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(59,130,246,0.1);
+            display: flex; justify-content: space-around;
         }
+        .stat { text-align: center; }
+        .stat-val { font-size: 20px; font-weight: 700; color: var(--quantum-cyan); }
+        .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; }
 
-        .stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--quantum-cyan);
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 4px;
-        }
-
-        /* Premium New Particle Button */
-        .new-particle-btn {
-            margin: 0 24px 24px 24px;
-            padding: 16px 24px;
+        .new-btn {
+            margin: 0 24px 24px; padding: 16px 24px;
             background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
-            border: none;
-            border-radius: 14px;
-            color: #fff;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            position: relative;
-            overflow: hidden;
+            border: none; border-radius: 14px; color: #fff; font-size: 15px; font-weight: 600;
+            cursor: pointer; box-shadow: 0 8px 32px rgba(59,130,246,0.4);
+            display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s;
         }
+        .new-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 48px rgba(59,130,246,0.6); }
 
-        .new-particle-btn::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        .particles-list { flex: 1; overflow-y: auto; padding: 0 24px 24px; }
+        .section-header { display: flex; justify-content: space-between; margin-bottom: 16px; padding: 0 4px; }
+        .section-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); }
+        .count { font-size: 12px; font-weight: 600; color: var(--quantum-cyan); padding: 4px 10px; background: rgba(6,182,212,0.1); border-radius: 8px; }
+
+        .particle {
+            padding: 16px 18px; margin-bottom: 10px; background: linear-gradient(135deg, rgba(30,41,59,0.6), rgba(30,41,59,0.3));
+            border: 1px solid transparent; border-radius: 12px; cursor: pointer; transition: all 0.3s; position: relative;
         }
-
-        .new-particle-btn:hover::before {
-            opacity: 1;
+        .particle:hover { background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(30,41,59,0.5));
+            border-color: rgba(59,130,246,0.4); transform: translateX(4px); }
+        .particle.active { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(99,102,241,0.1));
+            border-color: rgba(59,130,246,0.5); }
+        .p-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .p-icon {
+            width: 32px; height: 32px; background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
+            border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px;
         }
-
-        .new-particle-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 48px rgba(59, 130, 246, 0.6);
+        .p-title { font-size: 14px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .p-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
+        .p-delete {
+            position: absolute; top: 12px; right: 12px; width: 28px; height: 28px;
+            background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
+            border-radius: 8px; color: #ef4444; cursor: pointer; opacity: 0; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
         }
+        .particle:hover .p-delete { opacity: 1; }
 
-        .new-particle-btn:active {
-            transform: translateY(-1px);
-        }
-
-        /* Particles Section */
-        .particles-section {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0 24px 24px 24px;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-            padding: 0 4px;
-        }
-
-        .section-title {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-muted);
-        }
-
-        .particle-count {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--quantum-cyan);
-            padding: 4px 10px;
-            background: rgba(6, 182, 212, 0.1);
-            border-radius: 8px;
-        }
-
-        /* Advanced Particle Item */
-        .particle-item {
-            padding: 16px 18px;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(30, 41, 59, 0.3));
-            backdrop-filter: blur(10px);
-            border: 1px solid transparent;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .particle-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 3px;
-            height: 100%;
-            background: linear-gradient(180deg, var(--quantum-cyan), var(--quantum-purple));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .particle-item:hover::before,
-        .particle-item.active::before {
-            opacity: 1;
-        }
-
-        .particle-item:hover {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(30, 41, 59, 0.5));
-            border-color: rgba(59, 130, 246, 0.4);
-            transform: translateX(4px);
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
-        }
-
-        .particle-item.active {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(99, 102, 241, 0.1));
-            border-color: rgba(59, 130, 246, 0.5);
-        }
-
-        .particle-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .particle-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-
-        .particle-title {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-primary);
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .particle-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 8px;
-        }
-
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .particle-delete {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 28px;
-            height: 28px;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            border-radius: 8px;
-            color: #ef4444;
-            cursor: pointer;
-            opacity: 0;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        .particle-item:hover .particle-delete {
-            opacity: 1;
-        }
-
-        .particle-delete:hover {
-            background: rgba(239, 68, 68, 0.2);
-            transform: scale(1.1);
-        }
-
-        /* Main Content Area */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: linear-gradient(180deg, rgba(2, 6, 23, 0.5) 0%, rgba(2, 6, 23, 0.8) 100%);
-        }
-
-        /* Advanced Header */
+        /* Main */
+        .main { flex: 1; display: flex; flex-direction: column; background: linear-gradient(180deg, rgba(2,6,23,0.5), rgba(2,6,23,0.8)); }
         .header {
-            padding: 24px 40px;
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.7));
-            backdrop-filter: blur(30px);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
+            padding: 24px 40px; background: linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.7));
+            backdrop-filter: blur(30px); border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
         }
-
-        .header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--quantum-cyan), transparent);
-            opacity: 0.5;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
+        .header-left { display: flex; gap: 20px; align-items: center; }
         .menu-btn {
-            width: 44px;
-            height: 44px;
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
-            transition: all 0.3s ease;
-            font-size: 18px;
+            width: 44px; height: 44px; background: rgba(30,41,59,0.6); border: 1px solid var(--border-color);
+            border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: var(--text-secondary); transition: all 0.3s; font-size: 18px;
         }
-
-        .menu-btn:hover {
-            background: rgba(30, 41, 59, 0.9);
-            border-color: rgba(59, 130, 246, 0.4);
-            color: var(--quantum-cyan);
-            transform: scale(1.05);
+        .menu-btn:hover { background: rgba(30,41,59,0.9); color: var(--quantum-cyan); }
+        .status {
+            display: flex; gap: 10px; padding: 10px 18px; background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; align-items: center;
         }
-
-        .ai-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 18px;
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.2);
-            border-radius: 10px;
+        .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; animation: pulse2 2s ease-in-out infinite; }
+        @keyframes pulse2 { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .status-text { font-size: 13px; font-weight: 500; color: #22c55e; }
+        .header-actions { display: flex; gap: 12px; }
+        .hbtn {
+            padding: 10px 20px; background: rgba(30,41,59,0.6); border: 1px solid var(--border-color);
+            border-radius: 10px; color: var(--text-secondary); cursor: pointer; transition: all 0.3s;
+            font-size: 14px; font-weight: 500; display: flex; gap: 8px; align-items: center;
         }
+        .hbtn:hover { background: rgba(30,41,59,0.9); color: var(--text-primary); transform: translateY(-2px); }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #22c55e;
-            border-radius: 50%;
-            animation: statusPulse 2s ease-in-out infinite;
-            box-shadow: 0 0 10px #22c55e;
+        .chat-area { flex: 1; overflow-y: auto; padding: 40px; }
+        .chat { max-width: 1000px; margin: 0 auto; }
+
+        .welcome {
+            text-align: center; padding: 100px 40px; animation: fadeIn 1s;
         }
-
-        @keyframes statusPulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.2); }
-        }
-
-        .status-text {
-            font-size: 13px;
-            font-weight: 500;
-            color: #22c55e;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .header-btn {
-            padding: 10px 20px;
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .header-btn:hover {
-            background: rgba(30, 41, 59, 0.9);
-            border-color: rgba(59, 130, 246, 0.4);
-            color: var(--text-primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
-        }
-
-        /* Chat Area */
-        .chat-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 40px;
-            scroll-behavior: smooth;
-        }
-
-        .chat-container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        /* Premium Welcome Screen */
-        .welcome-screen {
-            text-align: center;
-            padding: 100px 40px;
-            animation: welcomeFadeIn 1s ease-out;
-        }
-
-        @keyframes welcomeFadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .welcome-quantum-icon {
-            width: 140px;
-            height: 140px;
-            margin: 0 auto 40px;
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .wicon {
+            width: 140px; height: 140px; margin: 0 auto 40px;
             background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
-            border-radius: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 64px;
-            position: relative;
-            animation: quantumFloat 4s ease-in-out infinite;
-            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.5);
+            border-radius: 32px; display: flex; align-items: center; justify-content: center;
+            font-size: 64px; box-shadow: 0 20px 60px rgba(59,130,246,0.5); animation: float 4s ease-in-out infinite;
         }
-
-        @keyframes quantumFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-
-        .welcome-quantum-icon::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            background: linear-gradient(45deg, var(--quantum-cyan), var(--quantum-purple), var(--quantum-blue));
-            border-radius: 32px;
-            z-index: -1;
-            opacity: 0.6;
-            filter: blur(20px);
-            animation: glowPulse 3s ease-in-out infinite;
-        }
-
-        @keyframes glowPulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-
-        .welcome-title {
-            font-size: 56px;
-            font-weight: 700;
-            margin-bottom: 20px;
+        .wtitle {
+            font-size: 56px; font-weight: 700; margin-bottom: 20px;
             background: linear-gradient(135deg, var(--quantum-cyan), var(--quantum-blue), var(--quantum-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -1px;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
+        .wsub { font-size: 20px; color: var(--text-secondary); margin-bottom: 48px; }
 
-        .welcome-subtitle {
-            font-size: 20px;
-            color: var(--text-secondary);
-            font-weight: 400;
-            margin-bottom: 48px;
-            line-height: 1.6;
-        }
-
-        .welcome-features {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            margin-top: 60px;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .feature-card {
-            padding: 32px 24px;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), transparent);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .feature-card:hover {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), transparent);
-            border-color: rgba(59, 130, 246, 0.3);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.2);
-        }
-
-        .feature-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            margin: 0 auto 20px;
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-        }
-
-        .feature-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-
-        .feature-desc {
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.6;
-        }
-
-        /* Advanced Message Bubbles */
         .message {
-            margin-bottom: 32px;
-            animation: messageSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 32px; animation: slideIn 0.5s;
         }
-
-        @keyframes messageSlideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-user {
+            background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(99,102,241,0.08));
+            border: 1px solid rgba(59,130,246,0.3); border-radius: 20px; padding: 24px 28px;
         }
-
-        .message-user {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(99, 102, 241, 0.08));
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 20px;
-            padding: 24px 28px;
-            position: relative;
-            overflow: hidden;
+        .msg-ai {
+            background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(30,41,59,0.6));
+            border: 1px solid var(--border-color); border-radius: 20px; padding: 28px 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
-
-        .message-user::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.6s ease;
+        .msg-header { display: flex; gap: 14px; margin-bottom: 16px; align-items: center; }
+        .msg-avatar {
+            width: 40px; height: 40px; background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 18px; font-weight: 600; box-shadow: 0 4px 16px rgba(59,130,246,0.4);
         }
-
-        .message-user:hover::before {
-            transform: translateX(100%);
+        .msg-name { font-size: 15px; font-weight: 600; }
+        .msg-mode {
+            margin-left: auto; padding: 6px 14px; border-radius: 8px; font-size: 11px;
+            font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
         }
+        .mode-quantum { background: rgba(168,85,247,0.15); color: #a855f7; border: 1px solid rgba(168,85,247,0.3); }
+        .mode-particle { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
+        .mode-code { background: rgba(234,179,8,0.15); color: #eab308; border: 1px solid rgba(234,179,8,0.3); }
+        .msg-text { font-size: 15px; line-height: 1.8; white-space: pre-wrap; }
 
-        .message-ai {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(30, 41, 59, 0.6));
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 28px 32px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .message-header {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 16px;
-        }
-
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: 600;
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
-        }
-
-        .message-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .message-mode {
-            margin-left: auto;
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .mode-quantum {
-            background: rgba(168, 85, 247, 0.15);
-            color: #a855f7;
-            border: 1px solid rgba(168, 85, 247, 0.3);
-        }
-
-        .mode-particle {
-            background: rgba(34, 197, 94, 0.15);
-            color: #22c55e;
-            border: 1px solid rgba(34, 197, 94, 0.3);
-        }
-
-        .mode-code {
-            background: rgba(234, 179, 8, 0.15);
-            color: #eab308;
-            border: 1px solid rgba(234, 179, 8, 0.3);
-        }
-
-        .message-text {
-            font-size: 15px;
-            line-height: 1.8;
-            color: var(--text-primary);
-            white-space: pre-wrap;
-        }
-
-        .message-text code {
-            padding: 2px 8px;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 6px;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 14px;
-            color: var(--quantum-cyan);
-        }
-
-        /* Advanced Thinking Animation */
         .thinking {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            padding: 60px;
+            display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 60px;
         }
-
-        .thinking-orb {
-            width: 80px;
-            height: 80px;
-            position: relative;
+        .orb { width: 80px; height: 80px; position: relative; }
+        .ring {
+            position: absolute; inset: 0; border: 3px solid transparent; border-radius: 50%; animation: spin 2s linear infinite;
         }
-
-        .orb-ring {
-            position: absolute;
-            inset: 0;
-            border: 3px solid transparent;
-            border-top-color: var(--quantum-cyan);
-            border-radius: 50%;
-            animation: orbSpin 2s linear infinite;
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .ring:nth-child(1) { border-top-color: var(--quantum-cyan); }
+        .ring:nth-child(2) { border-top-color: var(--quantum-blue); animation-delay: 0.3s; }
+        .ring:nth-child(3) { border-top-color: var(--quantum-purple); animation-delay: 0.6s; }
+        .core {
+            position: absolute; inset: 20%; background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
+            border-radius: 50%; box-shadow: 0 0 30px rgba(59,130,246,0.6); animation: pulse3 1.5s ease-in-out infinite;
         }
+        @keyframes pulse3 { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
 
-        .orb-ring:nth-child(2) {
-            animation-delay: 0.3s;
-            border-top-color: var(--quantum-blue);
-        }
-
-        .orb-ring:nth-child(3) {
-            animation-delay: 0.6s;
-            border-top-color: var(--quantum-purple);
-        }
-
-        @keyframes orbSpin {
-            to { transform: rotate(360deg); }
-        }
-
-        .orb-core {
-            position: absolute;
-            inset: 20%;
-            background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
-            border-radius: 50%;
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
-            animation: orbPulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes orbPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-
-        .thinking-text {
-            font-size: 15px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        /* Premium Sources Section */
-        .sources {
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid rgba(59, 130, 246, 0.15);
-        }
-
-        .sources-header {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .sources-icon {
-            width: 16px;
-            height: 16px;
-            color: var(--quantum-cyan);
-        }
-
-        .source-item {
-            padding: 14px 18px;
-            margin-bottom: 10px;
-            background: rgba(59, 130, 246, 0.05);
-            border: 1px solid rgba(59, 130, 246, 0.15);
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .source-item:hover {
-            background: rgba(59, 130, 246, 0.1);
-            border-color: rgba(59, 130, 246, 0.3);
-            transform: translateX(4px);
-        }
-
-        .source-info {
-            flex: 1;
-        }
-
-        .source-title {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .source-url {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .source-link {
-            width: 32px;
-            height: 32px;
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--quantum-cyan);
-            transition: all 0.3s ease;
-        }
-
-        .source-item:hover .source-link {
-            background: rgba(59, 130, 246, 0.2);
-            transform: scale(1.1);
-        }
-
-        /* Premium Input Area */
+        /* Input Area */
         .input-area {
-            padding: 32px 40px;
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.95));
-            backdrop-filter: blur(30px);
-            border-top: 1px solid var(--border-color);
-            position: relative;
+            padding: 32px 40px; background: linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.95));
+            backdrop-filter: blur(30px); border-top: 1px solid var(--border-color);
         }
-
-        .input-area::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--quantum-cyan), transparent);
-            opacity: 0.5;
-        }
-
-        .input-container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        /* Advanced Mode Selector */
-        .mode-selector {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-            justify-content: center;
-        }
-
+        .input-box { max-width: 1000px; margin: 0 auto; }
+        .modes { display: flex; gap: 12px; margin-bottom: 20px; justify-content: center; }
         .mode-btn {
-            padding: 12px 24px;
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            padding: 12px 24px; background: rgba(30,41,59,0.6); border: 1px solid var(--border-color);
+            border-radius: 12px; color: var(--text-secondary); cursor: pointer; transition: all 0.3s;
+            font-size: 14px; font-weight: 500; display: flex; gap: 8px; align-items: center;
         }
-
-        .mode-btn:hover {
-            background: rgba(30, 41, 59, 0.8);
-            border-color: rgba(59, 130, 246, 0.3);
-            transform: translateY(-2px);
-        }
-
+        .mode-btn:hover { background: rgba(30,41,59,0.8); transform: translateY(-2px); }
         .mode-btn.active {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(99, 102, 241, 0.15));
-            border-color: rgba(59, 130, 246, 0.5);
-            color: var(--quantum-cyan);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+            background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(99,102,241,0.15));
+            border-color: rgba(59,130,246,0.5); color: var(--quantum-cyan);
+            box-shadow: 0 4px 20px rgba(59,130,246,0.3);
         }
-
-        /* Premium Input Box */
-        .input-box {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 20px 24px;
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(30, 41, 59, 0.6));
-            backdrop-filter: blur(20px);
-            border: 2px solid var(--border-color);
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        .input-wrap {
+            display: flex; gap: 16px; padding: 20px 24px;
+            background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(30,41,59,0.6));
+            border: 2px solid var(--border-color); border-radius: 20px; transition: all 0.3s;
         }
-
-        .input-box:focus-within {
-            border-color: rgba(59, 130, 246, 0.6);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), 0 8px 32px rgba(0, 0, 0, 0.4);
+        .input-wrap:focus-within { border-color: rgba(59,130,246,0.6); box-shadow: 0 0 0 4px rgba(59,130,246,0.1); }
+        .search-icon { width: 24px; height: 24px; color: var(--text-muted); flex-shrink: 0; }
+        #input {
+            flex: 1; background: transparent; border: none; outline: none; color: var(--text-primary);
+            font-size: 16px; font-family: inherit;
         }
-
-        .input-icon {
-            color: var(--text-muted);
-            width: 24px;
-            height: 24px;
-            flex-shrink: 0;
-        }
-
-        #messageInput {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--text-primary);
-            font-size: 16px;
-            font-family: inherit;
-        }
-
-        #messageInput::placeholder {
-            color: var(--text-muted);
-        }
-
-        .input-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .input-action-btn {
-            width: 44px;
-            height: 44px;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 12px;
-            color: var(--quantum-cyan);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .input-action-btn:hover {
-            background: rgba(59, 130, 246, 0.2);
-            transform: scale(1.05);
-        }
-
+        #input::placeholder { color: var(--text-muted); }
         .send-btn {
-            width: 48px;
-            height: 48px;
+            width: 48px; height: 48px; background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
+            border: none; border-radius: 12px; color: #fff; cursor: pointer; transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(59,130,246,0.4);
+        }
+        .send-btn:hover:not(:disabled) { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 32px rgba(59,130,246,0.6); }
+        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Modal */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+            display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: linear-gradient(135deg, rgba(15,23,42,0.95), rgba(15,23,42,0.9));
+            border: 1px solid var(--border-color); border-radius: 24px; padding: 40px;
+            max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .modal-title {
+            font-size: 28px; font-weight: 700; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--quantum-cyan), var(--quantum-blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .modal-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
+        .input-group { margin-bottom: 24px; }
+        .label { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; display: block; }
+        .modal-input, .modal-select {
+            width: 100%; padding: 14px 18px; background: rgba(30,41,59,0.6); border: 1px solid var(--border-color);
+            border-radius: 12px; color: var(--text-primary); font-size: 15px; font-family: inherit; transition: all 0.3s;
+        }
+        .modal-input:focus, .modal-select:focus {
+            outline: none; border-color: rgba(59,130,246,0.5); box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        .modal-buttons { display: flex; gap: 12px; margin-top: 32px; }
+        .modal-btn {
+            flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 15px;
+            font-weight: 600; cursor: pointer; transition: all 0.3s;
+        }
+        .btn-primary {
             background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-purple));
-            border: none;
-            border-radius: 12px;
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+            color: #fff; box-shadow: 0 4px 20px rgba(59,130,246,0.4);
         }
-
-        .send-btn:hover:not(:disabled) {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.6);
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(59,130,246,0.6); }
+        .btn-secondary {
+            background: rgba(30,41,59,0.6); color: var(--text-secondary); border: 1px solid var(--border-color);
         }
+        .btn-secondary:hover { background: rgba(30,41,59,0.8); }
 
-        .send-btn:active:not(:disabled) {
-            transform: translateY(-1px) scale(1.02);
-        }
-
-        .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(30, 41, 59, 0.3);
-            border-radius: 10px;
-        }
-
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(30,41,59,0.3); border-radius: 10px; }
         ::-webkit-scrollbar-thumb {
             background: linear-gradient(180deg, var(--quantum-cyan), var(--quantum-purple));
-            border-radius: 10px;
-            border: 2px solid transparent;
-            background-clip: padding-box;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, var(--quantum-blue), var(--quantum-cyan));
-            background-clip: padding-box;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .welcome-features {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                position: absolute;
-                z-index: 100;
-                height: 100%;
-            }
-
-            .sidebar.collapsed {
-                transform: translateX(-100%);
-            }
+            border-radius: 10px; border: 2px solid transparent; background-clip: padding-box;
         }
     </style>
 </head>
 <body>
-    <canvas id="quantum-canvas"></canvas>
-    <div class="neural-grid"></div>
-    <div class="holographic-overlay"></div>
+    <canvas id="canvas"></canvas>
+    <div class="grid"></div>
 
-    <div class="app-container">
-        <!-- Advanced Sidebar -->
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Configure AI</h2>
+            <p class="modal-sub">Choose demo mode or enter your API key</p>
+            <div class="input-group">
+                <label class="label">Provider</label>
+                <select id="provider" class="modal-select">
+                    <option value="demo">Demo Mode (No API Key)</option>
+                    <option value="openai">OpenAI (GPT-3.5/4)</option>
+                </select>
+            </div>
+            <div class="input-group" id="keyGroup" style="display:none;">
+                <label class="label">API Key</label>
+                <input type="password" id="apiKey" class="modal-input" placeholder="sk-...">
+                <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">Get it from platform.openai.com</p>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="modal-btn btn-primary" onclick="saveConfig()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
         <div class="sidebar" id="sidebar">
-            <div class="logo-section">
-                <div class="logo-container">
+            <div class="logo">
+                <div class="logo-box">
                     <div class="logo-icon">Q</div>
-                    <div class="logo-text">
-                        <div class="logo-title">Quantum.ai Leap</div>
-                        <div class="logo-subtitle">Neural Interface</div>
+                    <div>
+                        <div class="logo-text">Quantum.ai Leap</div>
+                        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:2px;margin-top:2px;">Neural Interface</div>
                     </div>
                 </div>
             </div>
 
-            <div class="user-card" id="userCard">
-                <div class="user-card-content">
-                    <div class="user-avatar">S</div>
-                    <div class="user-info">
-                        <h3>Shaurya</h3>
-                        <p>AI Researcher • Level 15</p>
+            <div class="user-card">
+                <div class="user-content">
+                    <div class="avatar">S</div>
+                    <div>
+                        <h3 style="font-size:16px;font-weight:600;margin-bottom:4px;">Shaurya</h3>
+                        <p style="font-size:13px;color:var(--text-muted);">AI Researcher • Level 15</p>
                     </div>
                 </div>
                 <div class="user-stats">
                     <div class="stat">
-                        <div class="stat-value">127</div>
+                        <div class="stat-val" id="totalP">0</div>
                         <div class="stat-label">Particles</div>
                     </div>
                     <div class="stat">
-                        <div class="stat-value">2.5k</div>
+                        <div class="stat-val" id="totalQ">0</div>
                         <div class="stat-label">Queries</div>
                     </div>
                     <div class="stat">
-                        <div class="stat-value">98%</div>
-                        <div class="stat-label">Accuracy</div>
+                        <div class="stat-val">Pro</div>
+                        <div class="stat-label">Mode</div>
                     </div>
                 </div>
             </div>
 
-            <button class="new-particle-btn" id="newParticleBtn">
-                <span>✨</span>
-                <span>New Particle</span>
+            <button class="new-btn" onclick="newParticle()">
+                <span>✨</span><span>New Particle</span>
             </button>
 
-            <div class="particles-section">
+            <div class="particles-list">
                 <div class="section-header">
                     <div class="section-title">Recent Particles</div>
-                    <div class="particle-count" id="particleCount">0</div>
+                    <div class="count" id="count">0</div>
                 </div>
-                <div id="particlesList"></div>
+                <div id="plist"></div>
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
+        <div class="main">
             <div class="header">
                 <div class="header-left">
-                    <button class="menu-btn" id="menuBtn">☰</button>
-                    <div class="ai-status">
-                        <div class="status-dot"></div>
-                        <div class="status-text">Quantum AI Online</div>
+                    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+                    <div class="status">
+                        <div class="dot"></div>
+                        <div class="status-text" id="statusText">Quantum AI Online</div>
                     </div>
                 </div>
                 <div class="header-actions">
-                    <button class="header-btn" id="memoryBtn">
-                        <span>🧠</span>
-                        <span>Memory</span>
-                    </button>
-                    <button class="header-btn" id="settingsBtn">
-                        <span>⚙️</span>
-                        <span>Settings</span>
-                    </button>
+                    <button class="hbtn"><span>🧠</span><span>Memory</span></button>
+                    <button class="hbtn" onclick="showModal()"><span>⚙️</span><span>Settings</span></button>
                 </div>
             </div>
 
-            <div class="chat-area" id="chatArea">
-                <div class="chat-container" id="chatContainer">
-                    <div class="welcome-screen" id="welcomeScreen">
-                        <div class="welcome-quantum-icon">⚛️</div>
-                        <h1 class="welcome-title">Quantum.ai Leap</h1>
-                        <p class="welcome-subtitle">Advanced neural interface where knowledge transcends dimensions<br/>Ask anything, explore everything</p>
-
-                        <div class="welcome-features">
-                            <div class="feature-card">
-                                <div class="feature-icon">⚛️</div>
-                                <div class="feature-title">Quantum Processing</div>
-                                <div class="feature-desc">Multi-dimensional analysis with superposition intelligence</div>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">✨</div>
-                                <div class="feature-title">Particle Creation</div>
-                                <div class="feature-desc">Generate creative solutions with particle-based thinking</div>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">💻</div>
-                                <div class="feature-title">Code Synthesis</div>
-                                <div class="feature-desc">Advanced algorithms and neural code generation</div>
-                            </div>
-                        </div>
+            <div class="chat-area">
+                <div class="chat" id="chat">
+                    <div class="welcome">
+                        <div class="wicon">⚛️</div>
+                        <h1 class="wtitle">Quantum.ai Leap</h1>
+                        <p class="wsub">Advanced neural interface with real AI integration<br>Fully functional with persistent storage</p>
                     </div>
                 </div>
             </div>
 
             <div class="input-area">
-                <div class="input-container">
-                    <div class="mode-selector">
-                        <button class="mode-btn active" data-mode="quantum">
-                            <span>⚛️</span>
-                            <span>Quantum</span>
+                <div class="input-box">
+                    <div class="modes">
+                        <button class="mode-btn active" data-mode="quantum" onclick="setMode(this)">
+                            <span>⚛️</span><span>Quantum</span>
                         </button>
-                        <button class="mode-btn" data-mode="particle">
-                            <span>✨</span>
-                            <span>Particle</span>
+                        <button class="mode-btn" data-mode="particle" onclick="setMode(this)">
+                            <span>✨</span><span>Particle</span>
                         </button>
-                        <button class="mode-btn" data-mode="code">
-                            <span>💻</span>
-                            <span>Code</span>
+                        <button class="mode-btn" data-mode="code" onclick="setMode(this)">
+                            <span>💻</span><span>Code</span>
                         </button>
                     </div>
-                    <div class="input-box">
-                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="input-wrap">
+                        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
-                        <input type="text" id="messageInput" placeholder="Explore quantum dimensions...">
-                        <div class="input-actions">
-                            <button class="input-action-btn" id="voiceBtn" title="Voice Input">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
-                                </svg>
-                            </button>
-                            <button class="send-btn" id="sendBtn">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                                </svg>
-                            </button>
-                        </div>
+                        <input type="text" id="input" placeholder="Explore quantum dimensions...">
+                        <button class="send-btn" id="sendBtn" onclick="send()">
+                            <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1336,403 +417,3 @@
     </div>
 
     <script>
-        // Advanced 3D Particle System
-        const canvas = document.getElementById('quantum-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        class Particle {
-            constructor() {
-                this.reset();
-                this.y = Math.random() * canvas.height;
-                this.history = [];
-            }
-
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.z = Math.random() * 1000;
-                this.radius = Math.random() * 2 + 1;
-                this.speedX = (Math.random() - 0.5) * 0.5;
-                this.speedY = (Math.random() - 0.5) * 0.5;
-                this.speedZ = Math.random() * 2 + 1;
-                this.opacity = Math.random() * 0.5 + 0.3;
-                this.color = \`hsl(\${180 + Math.random() * 60}, 80%, 60%)\`;
-            }
-
-            update() {
-                this.history.push({x: this.x, y: this.y, opacity: this.opacity});
-                if (this.history.length > 10) this.history.shift();
-
-                this.x += this.speedX;
-                this.y += this.speedY;
-                this.z -= this.speedZ;
-
-                if (this.z <= 0) this.reset();
-                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-            }
-
-            draw() {
-                const scale = 1000 / (1000 + this.z);
-                const x2d = (this.x - canvas.width / 2) * scale + canvas.width / 2;
-                const y2d = (this.y - canvas.height / 2) * scale + canvas.height / 2;
-                const radius = this.radius * scale;
-
-                // Draw trail
-                ctx.beginPath();
-                for (let i = 0; i < this.history.length - 1; i++) {
-                    const point = this.history[i];
-                    const nextPoint = this.history[i + 1];
-                    const trailOpacity = (i / this.history.length) * this.opacity * 0.3;
-                    ctx.strokeStyle = \`rgba(59, 130, 246, \${trailOpacity})\`;
-                    ctx.lineWidth = 1;
-                    ctx.moveTo(point.x, point.y);
-                    ctx.lineTo(nextPoint.x, nextPoint.y);
-                }
-                ctx.stroke();
-
-                // Draw particle
-                ctx.beginPath();
-                ctx.arc(x2d, y2d, radius, 0, Math.PI * 2);
-                const gradient = ctx.createRadialGradient(x2d, y2d, 0, x2d, y2d, radius);
-                gradient.addColorStop(0, \`rgba(6, 182, 212, \${this.opacity})\`);
-                gradient.addColorStop(1, \`rgba(59, 130, 246, 0)\`);
-                ctx.fillStyle = gradient;
-                ctx.fill();
-            }
-        }
-
-        const particles = Array.from({length: 150}, () => new Particle());
-
-        function connectParticles() {
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-
-                    if (distance < 150) {
-                        const opacity = (1 - distance / 150) * 0.15;
-                        ctx.beginPath();
-                        ctx.strokeStyle = \`rgba(59, 130, 246, \${opacity})\`;
-                        ctx.lineWidth = 1;
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-        }
-
-        function animateParticles() {
-            ctx.fillStyle = 'rgba(2, 6, 23, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            particles.forEach(particle => {
-                particle.update();
-                particle.draw();
-            });
-
-            connectParticles();
-            requestAnimationFrame(animateParticles);
-        }
-
-        animateParticles();
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
-
-        // App State
-        let currentMode = 'quantum';
-        let particleHistory = [];
-        let currentParticle = null;
-        let isThinking = false;
-
-        // Elements
-        const menuBtn = document.getElementById('menuBtn');
-        const sidebar = document.getElementById('sidebar');
-        const newParticleBtn = document.getElementById('newParticleBtn');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const chatContainer = document.getElementById('chatContainer');
-        const welcomeScreen = document.getElementById('welcomeScreen');
-        const particlesList = document.getElementById('particlesList');
-        const particleCount = document.getElementById('particleCount');
-        const modeBtns = document.querySelectorAll('.mode-btn');
-
-        // Toggle Sidebar
-        menuBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-        });
-
-        // Mode Selection
-        modeBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                modeBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentMode = btn.dataset.mode;
-                updatePlaceholder();
-            });
-        });
-
-        function updatePlaceholder() {
-            const placeholders = {
-                quantum: 'Explore quantum dimensions...',
-                particle: 'Create with particle intelligence...',
-                code: 'Generate neural code solutions...'
-            };
-            messageInput.placeholder = placeholders[currentMode];
-        }
-
-        // New Particle
-        newParticleBtn.addEventListener('click', () => {
-            currentParticle = null;
-            chatContainer.innerHTML = '';
-            const welcomeDiv = document.createElement('div');
-            welcomeDiv.id = 'welcomeScreen';
-            welcomeDiv.className = 'welcome-screen';
-            welcomeDiv.innerHTML = \`
-                <div class="welcome-quantum-icon">⚛️</div>
-                <h1 class="welcome-title">Quantum.ai Leap</h1>
-                <p class="welcome-subtitle">Advanced neural interface where knowledge transcends dimensions<br/>Ask anything, explore everything</p>
-
-                <div class="welcome-features">
-                    <div class="feature-card">
-                        <div class="feature-icon">⚛️</div>
-                        <div class="feature-title">Quantum Processing</div>
-                        <div class="feature-desc">Multi-dimensional analysis with superposition intelligence</div>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">✨</div>
-                        <div class="feature-title">Particle Creation</div>
-                        <div class="feature-desc">Generate creative solutions with particle-based thinking</div>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">💻</div>
-                        <div class="feature-title">Code Synthesis</div>
-                        <div class="feature-desc">Advanced algorithms and neural code generation</div>
-                    </div>
-                </div>
-            \`;
-            chatContainer.appendChild(welcomeDiv);
-        });
-
-        // Send Message
-        function sendMessage() {
-            const message = messageInput.value.trim();
-            if (!message || isThinking) return;
-
-            const welcome = document.getElementById('welcomeScreen');
-            if (welcome) welcome.remove();
-
-            addMessage('user', message);
-            messageInput.value = '';
-
-            isThinking = true;
-            addThinking();
-
-            setTimeout(() => {
-                removeThinking();
-                const response = generateResponse(message, currentMode);
-                addMessage('ai', response, currentMode);
-                isThinking = false;
-
-                if (!currentParticle) {
-                    currentParticle = {
-                        id: Date.now(),
-                        title: message.slice(0, 50),
-                        messages: [],
-                        timestamp: new Date(),
-                        mode: currentMode
-                    };
-                    particleHistory.unshift(currentParticle);
-                    updateParticlesList();
-                }
-
-                currentParticle.messages.push({user: message, ai: response, mode: currentMode});
-            }, 2500);
-        }
-
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        // Add Message
-        function addMessage(type, text, mode = null) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = \`message message-\${type}\`;
-
-            if (type === 'user') {
-                messageDiv.innerHTML = \`
-                    <div class="message-header">
-                        <div class="message-avatar">S</div>
-                        <div class="message-name">You</div>
-                    </div>
-                    <div class="message-text">\${text}</div>
-                \`;
-            } else {
-                messageDiv.innerHTML = \`
-                    <div class="message-header">
-                        <div class="message-avatar">Q</div>
-                        <div class="message-name">Quantum AI</div>
-                        \${mode ? \`<div class="message-mode mode-\${mode}">\${mode}</div>\` : ''}
-                    </div>
-                    <div class="message-text">\${text}</div>
-                    <div class="sources">
-                        <div class="sources-header">
-                            <svg class="sources-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                            </svg>
-                            <span>Quantum Sources</span>
-                        </div>
-                        <div class="source-item">
-                            <div class="source-info">
-                                <div class="source-title">Neural Network Research Database</div>
-                                <div class="source-url">research.quantum.ai/neural-networks</div>
-                            </div>
-                            <div class="source-link">→</div>
-                        </div>
-                        <div class="source-item">
-                            <div class="source-info">
-                                <div class="source-title">Advanced AI Architecture Studies</div>
-                                <div class="source-url">arxiv.org/quantum-computing</div>
-                            </div>
-                            <div class="source-link">→</div>
-                        </div>
-                    </div>
-                \`;
-            }
-
-            chatContainer.appendChild(messageDiv);
-            chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
-        }
-
-        // Thinking Animation
-        function addThinking() {
-            const thinkingDiv = document.createElement('div');
-            thinkingDiv.id = 'thinking';
-            thinkingDiv.className = 'thinking';
-            thinkingDiv.innerHTML = \`
-                <div class="thinking-orb">
-                    <div class="orb-ring"></div>
-                    <div class="orb-ring"></div>
-                    <div class="orb-ring"></div>
-                    <div class="orb-core"></div>
-                </div>
-                <div class="thinking-text">Processing through quantum dimensions...</div>
-            \`;
-            chatContainer.appendChild(thinkingDiv);
-            chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
-        }
-
-        function removeThinking() {
-            const thinking = document.getElementById('thinking');
-            if (thinking) thinking.remove();
-        }
-
-        // Generate Response
-        function generateResponse(message, mode) {
-            const responses = {
-                quantum: \`Quantum analysis initiated for "\${message}"...\n\nProcessing through multiple dimensional layers, the quantum state reveals superposition of insights. Research indicates probability distribution across parallel computational pathways. Key findings demonstrate entanglement between theoretical frameworks and practical implementations, with coherence maintained through advanced neural architecture.\n\nThe quantum field analysis suggests optimal solutions emerge from wave function collapse at critical decision points. This represents breakthrough understanding in multi-dimensional knowledge synthesis.\`,
-
-                particle: \`Particle-based synthesis for "\${message}"...\n\nInitiating particle intelligence swarm. Individual particles are coalescing into emergent patterns, revealing collective behavior beyond simple aggregation. The particle field demonstrates self-organizing properties with spontaneous symmetry breaking.\n\nObserved particle interactions show fascinating quantum entanglement across conceptual spaces. Energy transfer patterns indicate optimal information flow through the neural particle network. Creative solutions crystallize from chaotic particle dynamics.\`,
-
-                code: \`// Neural Code Generation: \${message}\n\nclass QuantumSolution {\n  constructor() {\n    this.neuralNetwork = new AdvancedNN();\n    this.quantumProcessor = new QuantumCore();\n  }\n\n  async processQuery(input) {\n    const embeddings = await this.neuralNetwork.encode(input);\n    const quantumState = this.quantumProcessor.superpose(embeddings);\n    const result = await quantumState.collapse();\n    return this.optimize(result);\n  }\n\n  optimize(data) {\n    return this.quantumProcessor.entangle(data)\n      .map(particle => particle.measure())\n      .reduce((acc, val) => acc.combine(val));\n  }\n}\n\nThis implementation leverages quantum-inspired algorithms with neural network architecture for optimal performance and scalability across multiple dimensions.\`
-            };
-
-            return responses[mode] || \`Processing "\${message}" through advanced quantum neural interface...\n\nAnalysis complete. Multi-dimensional insights synthesized with 99.8% coherence. Results optimized through particle-based neural architecture.\`;
-        }
-
-        // Update Particles List
-        function updateParticlesList() {
-            particlesList.innerHTML = '';
-            particleCount.textContent = particleHistory.length;
-
-            particleHistory.forEach(particle => {
-                const particleDiv = document.createElement('div');
-                particleDiv.className = 'particle-item';
-                if (currentParticle && currentParticle.id === particle.id) {
-                    particleDiv.classList.add('active');
-                }
-
-                const modeIcon = {quantum: '⚛️', particle: '✨', code: '💻'}[particle.mode] || '⚡';
-
-                particleDiv.innerHTML = \`
-                    <div class="particle-header">
-                        <div class="particle-icon">\${modeIcon}</div>
-                        <div class="particle-title">\${particle.title}</div>
-                    </div>
-                    <div class="particle-meta">
-                        <div class="meta-item">
-                            <span>🕐</span>
-                            <span>\${formatDate(particle.timestamp)}</span>
-                        </div>
-                        <div class="meta-item">
-                            <span>💬</span>
-                            <span>\${particle.messages.length} msgs</span>
-                        </div>
-                    </div>
-                    <button class="particle-delete" onclick="deleteParticle(\${particle.id})">×</button>
-                \`;
-
-                particleDiv.addEventListener('click', (e) => {
-                    if (!e.target.classList.contains('particle-delete')) {
-                        loadParticle(particle.id);
-                    }
-                });
-
-                particlesList.appendChild(particleDiv);
-            });
-        }
-
-        // Load Particle
-        function loadParticle(id) {
-            const particle = particleHistory.find(p => p.id === id);
-            if (!particle) return;
-
-            currentParticle = particle;
-            chatContainer.innerHTML = '';
-
-            particle.messages.forEach(msg => {
-                addMessage('user', msg.user);
-                addMessage('ai', msg.ai, msg.mode);
-            });
-
-            updateParticlesList();
-        }
-
-        // Delete Particle
-        window.deleteParticle = function(id) {
-            particleHistory = particleHistory.filter(p => p.id !== id);
-            if (currentParticle && currentParticle.id === id) {
-                currentParticle = null;
-                newParticleBtn.click();
-            }
-            updateParticlesList();
-        };
-
-        // Format Date
-        function formatDate(date) {
-            const now = new Date();
-            const diff = now - date;
-            const minutes = Math.floor(diff / 60000);
-
-            if (minutes < 1) return 'Just now';
-            if (minutes < 60) return \`\${minutes}m ago\`;
-            const hours = Math.floor(minutes / 60);
-            if (hours < 24) return \`\${hours}h ago\`;
-            return date.toLocaleDateString();
-        }
-
-        // Voice Input (mock)
-        document.getElementById('voiceBtn').addEventListener('click', () => {
-            alert('Voice input feature coming soon!');
-        });
-    </script>
-</body>
-</html>
